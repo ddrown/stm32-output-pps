@@ -15,3 +15,7 @@ Use STM32CubeMX to view the pinout
  * Src/main.c - setup and main loop
  * Src/stm32f0xx\_hal\_msp.c - auto-generated GPIO mapping code
  * Src/stm32f0xx\_it.c - auto-generated interrupt handlers
+
+Clocks are setup for 12MHz HSE (bypass not crystal) and 48MHz PLL
+
+Hardware is a stm32f030f4p6 with 12MHz TCXO
