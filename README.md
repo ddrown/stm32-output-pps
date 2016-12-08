@@ -18,4 +18,6 @@ Use STM32CubeMX to view the pinout
 
 Clocks are setup for 12MHz HSE (bypass not crystal) and 48MHz PLL
 
-Hardware is a stm32f030f4p6 with 12MHz TCXO
+Hardware is a stm32f030f4p6 with 12MHz TCXO, communication is via i2c. Debug output is on the uart
+
+Example i2c client program (for running on a Raspberry Pi or other Linux SBC) is in i2c-read.c
