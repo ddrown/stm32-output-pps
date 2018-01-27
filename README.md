@@ -47,7 +47,7 @@ last adjust 48034
 
 ```
 
-After this first adjustment, the offset between this PPS and a GPS module's PPS:
+After the adjustments above, the clock was left to run. Below is the offset between this module's PPS and a GPS module's PPS:
 
 ![Offset](images/run-tcxo.png?raw=true)
 
