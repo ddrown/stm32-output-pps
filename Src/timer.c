@@ -7,7 +7,7 @@
 // in hundreds of picoseconds, range +/-214ms
 static int32_t offset_ps = 0;
 static int32_t static_ppt = 0;
-// 48MHz
+// 1 cycle in 48MHz in hundreds of picoseconds
 #define PS_PER_COUNT 208
 // 1ms in 48MHz
 #define DEFAULT_PRESCALER 47999

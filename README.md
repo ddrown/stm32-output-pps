@@ -8,7 +8,7 @@ arm-none-eabi-gcc should come with newlib (or other embedded c library)
 
 "make flash" - build the binary and flash it with a ST-Link (depends on ST-LINK\_CLI being in your path)
 
-Use STM32CubeMX to view the pinout
+Use STM32CubeMX to view the pinout or see the source code in Src/stm32f0xx\_hal\_msp.c
 
  * Src/adc.c - ADC (for core temperature, measured at 10Hz)
  * Src/timer.c - hardware timers driving 1PPS (TIM1 = drives PPS output, TIM3 = overflows at 1khz and drives TIM1)
@@ -20,6 +20,15 @@ Use STM32CubeMX to view the pinout
  * Src/system\_stm32f0xx.c - auto-generated system initialization
 
 The function timer\_ppt in Src/timer.c converts temperature sensor reading into an expected TCXO frequency error.  Measure your TCXO and use your own TCXO\_\* values for best results.
+
+commands:
+ * temp - CPU temp sensor
+ * vcc - CPU voltage sensor
+ * ppb - print timer freq (temperature compensation + static configured)
+ * offset - print timer estimated offset and last used counter adjustment
+ * o [ns] - add offset, limited to +/- 214,748,364 ns and adjusted at 250ppm
+ * f [ppb] - set static configured frequency in parts per billion, limited to +/-250ppm 
+ * help - print help
 
 Example uart session (comments marked with #):
 
