@@ -46,3 +46,11 @@ offset 1353 ns
 last adjust 48034
 
 ```
+
+After this first adjustment, the offset between this PPS and a GPS module's PPS:
+
+![Offset](images/run-tcxo.png?raw=true)
+
+Allan deviation of the above offset
+
+![adev](images/adev-tcxo.png?raw=true)
