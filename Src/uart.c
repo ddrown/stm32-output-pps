@@ -5,6 +5,10 @@
 
 #include "uart.h"
 
+void write_uart_ch(char ch) {
+  HAL_UART_Transmit(&UART_NAME, (uint8_t *)&ch, 1, 500);
+}
+
 void write_uart_s(const char *s) {
   HAL_UART_Transmit(&UART_NAME, (uint8_t *)s, strlen(s), 500);
 }

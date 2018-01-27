@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+
+use strict;
+
+my(@objects);
+open(OBJDUMP,"arm-none-eabi-objdump -x build/output-pps-uart.elf |") or die("unable to open objdump: $!");
+while(<OBJDUMP>) {
+  if(/^080/) {
+    chomp($_);
+    my(@a) = split(/ +/);
+    push(@objects,[$_,@a]);
+  }
+}
+
+my(@sizes);
+my($last, $lastline);
+foreach my $object (sort { $objects[$a][1] cmp $objects[$b][1] } 0..$#objects) {
+  my $this = hex($objects[$object][1]);
+  if(defined($last)) {
+    push(@sizes, [$this-$last,$lastline]);
+  }
+  $last=$this;
+  $lastline=$objects[$object][0];
+}
+
+foreach my $object (sort { $sizes[$a][0] <=> $sizes[$b][0] } 0..$#sizes) {
+  printf("%4u %s\n", $sizes[$object][0], $sizes[$object][1]);
+}

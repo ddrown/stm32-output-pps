@@ -4,6 +4,7 @@
 extern UART_HandleTypeDef huart1;
 #define UART_NAME huart1
 
+void write_uart_ch(char ch);
 void write_uart_s(const char *s);
 void write_uart_u(uint32_t i);
 void write_uart_i(int32_t i);
