@@ -7,7 +7,7 @@
 // in hundreds of picoseconds, range +/-214ms
 static int32_t offset_ps = 0;
 static int32_t static_ppt = 0;
-// 1 cycle in 48MHz in hundreds of picoseconds
+// 48MHz, in hundreds of picoseconds
 #define PS_PER_COUNT 208
 // 1ms in 48MHz
 #define DEFAULT_PRESCALER 47999
@@ -15,21 +15,22 @@ static int32_t static_ppt = 0;
 #define MAX_ADJUST 15000
 
 static uint16_t lastadjust = DEFAULT_PRESCALER;
-static uint8_t pending_prescale = 0;
+static enum {PRESCALE_NORMAL, PRESCALE_PENDING, PRESCALE_ACTIVE} pending_prescale = PRESCALE_NORMAL;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-  if(pending_prescale == 1) {
+  if(pending_prescale == PRESCALE_PENDING) {
     htim3.Instance->ARR = lastadjust;
-    pending_prescale = 2;
-  } else if(pending_prescale == 2) {
+    pending_prescale = PRESCALE_ACTIVE;
+  } else if(pending_prescale == PRESCALE_ACTIVE) {
     htim3.Instance->ARR = DEFAULT_PRESCALER;
-    pending_prescale = 0;
+    pending_prescale = PRESCALE_NORMAL;
   }
 }
 
 void adjust_pps() {
   int32_t offset_count;
 
+  // hundreds of picoseconds
   offset_ps -= (timer_ppt() + static_ppt) / 100;
   offset_count = offset_ps / PS_PER_COUNT;
 
@@ -41,7 +42,7 @@ void adjust_pps() {
   // remove the adjusted part, leave the rest
   offset_ps -= offset_count * PS_PER_COUNT;
   lastadjust = DEFAULT_PRESCALER - offset_count;
-  pending_prescale = 1;
+  pending_prescale = PRESCALE_PENDING;
 }
 
 // caller should limit offset to prevent wraps
@@ -62,20 +63,23 @@ void timer_start() {
 // these values are from a specific TCXO, you'll need to measure your own hardware for best results.
 // fixed-point math is used to save flash space, Cortex-M0 uses software floating point
 // most terms are multipled by 1e6
-// g(x) = 1.234535 + 0.02229774 * (x + 1.215454) - 0.0002962121 * (x + 1.215454)**2
-//
-#define TCXO_A 1234535
-#define TCXO_B 22298
-#define TCXO_C 1215454
-// 1000000/-0.0002962121 = -3375959321
-#define TCXO_D -3375959321
+// g(x) = TEMP_ADJUST_A + TEMP_ADJUST_B * (x + TEMP_ADJUST_C) + ((x + TEMP_ADJUST_C)**2) / TEMP_ADJUST_D
 
-// +/- 2,000 ppm
+// 1.234535 * 1,000,000
+#define TEMP_ADJUST_A 1234535
+// 0.02229774 * 1,000,000
+#define TEMP_ADJUST_B 22298
+// 1.215454 * 1,000,000
+#define TEMP_ADJUST_C 1215454
+// 1/0.0002962121 * -1,000,000
+#define TEMP_ADJUST_D -3375959321
+
+// limits: +/- 2,147 ppm
 int32_t timer_ppt() {
   int32_t temp_uF = last_temp() * 1000;
-  int64_t ppt_a64 = TCXO_B * (int64_t)(temp_uF + TCXO_C) / 1000000;
-  int64_t ppt_b64 = ((int64_t)(temp_uF + TCXO_C))*(temp_uF + TCXO_C) / TCXO_D;
-  int64_t ppt = TCXO_A + ppt_a64 + ppt_b64;
+  int64_t ppt_a64 = TEMP_ADJUST_B * (int64_t)(temp_uF + TEMP_ADJUST_C) / 1000000;
+  int64_t ppt_b64 = ((int64_t)(temp_uF + TEMP_ADJUST_C))*(temp_uF + TEMP_ADJUST_C) / TEMP_ADJUST_D;
+  int64_t ppt = TEMP_ADJUST_A + ppt_a64 + ppt_b64;
 
   return ppt;
 }
